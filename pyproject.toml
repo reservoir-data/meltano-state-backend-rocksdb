@@ -232,12 +232,6 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[[tool.mypy.overrides]]
-follow_untyped_imports = true
-module = [
-  "meltano.*",
-]
-
 [tool.uv]
 prerelease = "allow"
 preview = true
