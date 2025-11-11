@@ -38,6 +38,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
@@ -67,6 +68,14 @@ typing = [
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.uv]
+prerelease = "allow"
+preview = true
+required-version = ">=0.5.19"
+
+[tool.uv.sources]
+meltano = { git = "https://github.com/meltano/meltano.git" }
 
 [tool.ruff]
 line-length = 88
@@ -146,7 +155,7 @@ lint.isort.required-imports = [
 lint.pydocstyle.convention = "google"
 
 [tool.pyproject-fmt]
-max_supported_python = "3.13"
+max_supported_python = "3.14"
 
 [tool.pytest.ini_options]
 addopts = [
@@ -178,6 +187,7 @@ min_version = "4.22"
 requires = [ "tox", "tox-uv" ]
 env_list = [
   "typing",
+  "3.14",
   "3.13",
   "3.12",
   "3.11",
@@ -196,6 +206,7 @@ depends = [
   "3.11",
   "3.12",
   "3.13",
+  "3.14",
 ]
 dependency_groups = [ "testing" ]
 commands = [
@@ -231,11 +242,3 @@ strict = true
 warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
-
-[tool.uv]
-prerelease = "allow"
-preview = true
-required-version = ">=0.5.19"
-
-[tool.uv.sources]
-meltano = { git = "https://github.com/meltano/meltano.git" }
