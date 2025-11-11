@@ -100,7 +100,7 @@ class RocksDBStateStoreManager(StateStoreManager):
         Returns:
             List of state_ids available in this state store manager.
         """
-        return [
+        return [  # ty: ignore[invalid-return-type]
             state_id  # type: ignore[misc]
             for state_id in self.db.keys()  # noqa: SIM118
             if not pattern or fnmatch.fnmatch(state_id, pattern)  # type: ignore[type-var]
