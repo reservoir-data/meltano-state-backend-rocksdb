@@ -5,7 +5,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/meltano-state-backend-rocksdb.svg?logo=python&logoColor=FFE873)](https://pypi.org/project/meltano-state-backend-rocksdb)
 -->
 
-This is a [Meltano][meltano] extension that provides a [RocksDB][rocksdb] [state backend][state-backend] using the [RocksDict][rocksdict] library.
+This is a [Meltano] extension that provides a [RocksDB] [state backend][state-backend] using the [RocksDict] library.
 
 ## Installation
 
@@ -43,12 +43,12 @@ state_backend:
 
 ### Environment Variables
 
-* `MELTANO_STATE_BACKEND_URI`: The URI of the RocksDB state backend.
-* `MELTANO_STATE_BACKEND_ROCKSDB_WRITE_BUFFER_SIZE`: The RocksDB write buffer size in bytes.
+- `MELTANO_STATE_BACKEND_URI`: The URI of the RocksDB state backend.
+- `MELTANO_STATE_BACKEND_ROCKSDB_WRITE_BUFFER_SIZE`: The RocksDB write buffer size in bytes.
 
 [meltano]: https://meltano.com
+[pipx]: https://github.com/pypa/pipx
 [rocksdb]: https://rocksdb.org
 [rocksdict]: https://github.com/Congyuwang/RocksDict
 [state-backend]: https://docs.meltano.com/concepts/state_backends
-[pipx]: https://github.com/pypa/pipx
 [uv]: https://docs.astral.sh/uv

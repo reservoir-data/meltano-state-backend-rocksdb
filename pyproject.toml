@@ -2,7 +2,7 @@
 build-backend = "hatchling.build"
 requires = [
   "hatch-vcs==0.5",
-  "hatchling==1.29.0",
+  "hatchling==1.29",
 ]
 
 [project]
@@ -17,13 +17,6 @@ keywords = [
   "state",
 ]
 license = "MIT"
-license-files = [ "LICENSE" ]
-maintainers = [
-  { name = "Edgar Ramírez Mondragón", email = "edgarrm358@gmail.com" },
-]
-authors = [
-  { name = "Edgar Ramírez Mondragón", email = "edgarrm358@gmail.com" },
-]
 requires-python = ">=3.10"
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -31,7 +24,6 @@ classifiers = [
   "Intended Audience :: Education",
   "Intended Audience :: Information Technology",
   "Intended Audience :: System Administrators",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
@@ -49,8 +41,15 @@ dependencies = [
   "meltano>=3.7",
   "rocksdict~=0.3",
 ]
-entry-points."meltano.settings".write_buffer_size = "meltano_state_backend_rocksdb.rocksdb:WRITE_BUFFER_SIZE"
-entry-points."meltano.state_backends".rocksdb = "meltano_state_backend_rocksdb.rocksdb:RocksDBStateStoreManager"
+[[project.authors]]
+name = "Edgar Ramírez Mondragón"
+email = "edgarrm358@gmail.com"
+[project.entry-points]
+"meltano.settings".write_buffer_size = "meltano_state_backend_rocksdb.rocksdb:WRITE_BUFFER_SIZE"
+"meltano.state_backends".rocksdb = "meltano_state_backend_rocksdb.rocksdb:RocksDBStateStoreManager"
+[[project.maintainers]]
+name = "Edgar Ramírez Mondragón"
+email = "edgarrm358@gmail.com"
 
 [dependency-groups]
 dev = [
@@ -60,6 +59,7 @@ dev = [
 testing = [
   "coverage[toml]>=7.6.10",
   "pytest>=8",
+  "pytest-github-actions-annotate-failures>=0.4",
 ]
 typing = [
   "mypy>=1",
@@ -67,21 +67,21 @@ typing = [
 ]
 
 [tool.hatch.version]
+fallback = "0.1.0.dev0"
 source = "vcs"
 
 [tool.uv]
+required-version = ">=0.10"
 prerelease = "allow"
 preview = true
-required-version = ">=0.5.19"
-
 [tool.uv.sources]
 meltano = { git = "https://github.com/meltano/meltano.git" }
 
 [tool.ruff]
 line-length = 88
 preview = true
-
-lint.select = [
+[tool.ruff.lint]
+select = [
   "A",    # flake8-builtins
   "ANN",  # flake8-annotations
   "ARG",  # flake8-unused-arguments
@@ -132,42 +132,45 @@ lint.select = [
   "W",    # pycodestyle (warning)
   "YTT",  # flake8-2020
 ]
-lint.ignore = [
+ignore = [
   "S310",  # Allow `urllib.open`
   "S603",  # Allow `subprocess.run(..., shell=False)`
   "UP026", # Replace `mock` import with `unittest.mock` - remove once Python 3.7 support is dropped
 ]
-
-lint.per-file-ignores."tests/**" = [
+per-file-ignores."tests/**" = [
   "D",    # Don't lint docstrings in tests
   "S101", # Allow 'assert' in tests
 ]
-lint.flake8-annotations.allow-star-arg-any = true
-lint.flake8-annotations.mypy-init-return = true
-lint.flake8-annotations.suppress-dummy-args = true
-lint.flake8-pytest-style.parametrize-values-type = "tuple"
-lint.isort.known-first-party = [
-  "meltano_state_backend_rocksdb",
-]
-lint.isort.required-imports = [
-  "from __future__ import annotations",
-]
-lint.pydocstyle.convention = "google"
+flake8-annotations.allow-star-arg-any = true
+flake8-annotations.mypy-init-return = true
+flake8-annotations.suppress-dummy-args = true
+flake8-pytest-style.parametrize-values-type = "tuple"
+pydocstyle.convention = "google"
 
 [tool.pyproject-fmt]
-max_supported_python = "3.14"
+table_format = "long"
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
   "--durations=10",
+  "-v",
+  "-ra",
 ]
+filterwarnings = [ "error" ]
+log_level = "INFO"
+minversion = "9"
+strict = true
+testpaths = [ "tests" ]
 
 [tool.coverage.paths]
 package = [
   "src/meltano_state_backend_rocksdb/",
   "*/site-packages/meltano_state_backend_rocksdb/",
 ]
-
+[tool.coverage.report]
+exclude_also = [
+  "if (t\\.)?TYPE_CHECKING:",
+]
 [tool.coverage.run]
 branch = true
 source = [
@@ -177,36 +180,19 @@ source = [
 parallel = true
 relative_files = true
 
-[tool.coverage.report]
-exclude_also = [
-  '''if (t\.)?TYPE_CHECKING:''',
-]
-
 [tool.tox]
-min_version = "4.22"
-requires = [ "tox", "tox-uv" ]
+requires = [ "tox>=4.51", "tox-uv" ]
 env_list = [
   "typing",
-  "3.14",
-  "3.13",
-  "3.12",
-  "3.11",
-  "3.10",
+  { product = [
+    { prefix = "3.", start = 10 },
+  ] },
   "coverage",
 ]
-
-[tool.tox.env_run_base]
-runner = "uv-venv-lock-runner"
-dependency_groups = [ "testing" ]
-commands = [ [ "coverage", "run", "-m", "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
-
 [tool.tox.env.coverage]
+description = "combine and report coverage results"
 depends = [
-  "3.10",
-  "3.11",
-  "3.12",
-  "3.13",
-  "3.14",
+  "3.*",
 ]
 dependency_groups = [ "testing" ]
 commands = [
@@ -215,7 +201,10 @@ commands = [
   [ "coverage", "xml" ],
 ]
 
+[tool.tox.env.default]
+runner = "uv-venv-lock-runner"
 [tool.tox.env.typing]
+description = "type checks"
 dependency_groups = [ "testing", "typing" ]
 commands = [
   [
@@ -235,6 +224,12 @@ commands = [
     ], extend = true },
   ],
 ]
+[tool.tox.env_run_base]
+description = "run tests on Python {py_dot_ver}"
+base_python_file = [ ".python-version" ]
+runner = "uv-venv-lock-runner"
+dependency_groups = [ "testing" ]
+commands = [ [ "coverage", "run", "-m", "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
 
 [tool.mypy]
 enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
