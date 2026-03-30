@@ -103,7 +103,7 @@ class RocksDBStateStoreManager(StateStoreManager):
         return [  # ty: ignore[invalid-return-type]
             state_id  # type: ignore[misc]
             for state_id in self.db.keys()  # noqa: SIM118
-            if not pattern or fnmatch.fnmatch(state_id, pattern)  # type: ignore[type-var]
+            if not pattern or fnmatch.fnmatch(state_id, pattern)  # type: ignore[type-var]  # ty:ignore[invalid-argument-type]
         ]
 
     @contextmanager
