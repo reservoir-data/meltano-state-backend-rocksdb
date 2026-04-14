@@ -58,7 +58,7 @@ dev = [
 ]
 testing = [
   "coverage[toml]>=7.6.10",
-  "pytest>=8",
+  "pytest>=9.0.3",
   "pytest-github-actions-annotate-failures>=0.4",
 ]
 typing = [
