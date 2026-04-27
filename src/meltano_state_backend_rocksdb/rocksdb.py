@@ -3,14 +3,20 @@
 from __future__ import annotations
 
 import fnmatch
-import typing as t
+import sys
 from contextlib import contextmanager
+from typing import TYPE_CHECKING, Any
 
 from meltano.core.setting_definition import SettingDefinition
 from meltano.core.state_store import MeltanoState, StateStoreManager
 from rocksdict import Options, Rdict
 
-if t.TYPE_CHECKING:
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
+if TYPE_CHECKING:
     from collections.abc import Generator
 
 WRITE_BUFFER_SIZE = SettingDefinition(
@@ -24,14 +30,17 @@ WRITE_BUFFER_SIZE = SettingDefinition(
 class RocksDBStateStoreManager(StateStoreManager):
     """A state store manager that uses RocksDB as the backend."""
 
-    label: str = "On-disk RocksDB key-value store"
+    @property
+    @override
+    def label(self) -> str:
+        return "On-disk RocksDB key-value store"
 
     def __init__(
         self,
         uri: str,
         *,
         write_buffer_size: int | None,
-        **kwargs: t.Any,
+        **kwargs: Any,
     ) -> None:
         """Create a RocksDBStateStoreManager.
 
@@ -52,6 +61,7 @@ class RocksDBStateStoreManager(StateStoreManager):
 
         self.db = Rdict(self.path, options=options)
 
+    @override
     def set(self, state: MeltanoState) -> None:
         """Set state for the given state_id.
 
@@ -63,6 +73,7 @@ class RocksDBStateStoreManager(StateStoreManager):
             "partial": state.partial_state,
         }
 
+    @override
     def get(self, state_id: str) -> MeltanoState | None:
         """Get state for the given state_id.
 
@@ -72,7 +83,7 @@ class RocksDBStateStoreManager(StateStoreManager):
         Returns:
             Dict representing state that would be used in the next run.
         """
-        state_dict: dict[str, t.Any] | None = self.db.get(state_id)
+        state_dict: dict[str, Any] | None = self.db.get(state_id)
         return (
             MeltanoState(
                 state_id=state_id,
@@ -83,6 +94,7 @@ class RocksDBStateStoreManager(StateStoreManager):
             else None
         )
 
+    @override
     def delete(self, state_id: str) -> None:
         """Clear state for the given state_id.
 
@@ -91,6 +103,7 @@ class RocksDBStateStoreManager(StateStoreManager):
         """
         self.db.delete(state_id)
 
+    @override
     def get_state_ids(self, pattern: str | None = None) -> list[str]:
         """Get all state_ids available in this state store manager.
 
@@ -106,12 +119,13 @@ class RocksDBStateStoreManager(StateStoreManager):
             if not pattern or fnmatch.fnmatch(state_id, pattern)  # type: ignore[type-var]  # ty:ignore[invalid-argument-type]
         ]
 
+    @override
     @contextmanager
-    def acquire_lock(  # noqa: PLR6301
+    def acquire_lock(
         self,
-        state_id: str,  # noqa: ARG002
+        state_id: str,
         *,
-        retry_seconds: int,  # noqa: ARG002
+        retry_seconds: float,
     ) -> Generator[None, None, None]:
         """Acquire a naive lock for the given job's state.
 

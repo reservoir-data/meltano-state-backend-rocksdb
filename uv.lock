@@ -738,6 +738,7 @@ source = { editable = "." }
 dependencies = [
     { name = "meltano" },
     { name = "rocksdict" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
 ]
 
 [package.dev-dependencies]
@@ -762,6 +763,7 @@ typing = [
 requires-dist = [
     { name = "meltano", git = "https://github.com/meltano/meltano.git" },
     { name = "rocksdict", specifier = "~=0.3" },
+    { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4.15.0" },
 ]
 
 [package.metadata.requires-dev]
