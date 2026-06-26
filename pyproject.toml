@@ -152,11 +152,11 @@ pydocstyle.convention = "google"
 table_format = "long"
 
 [tool.mypy]
+warn_unused_ignores = true
+warn_unreachable = true
 enable_error_code = [ "ignore-without-code", "redundant-expr", "truthy-bool" ]
 strict = true
-warn_unreachable = true
 warn_unused_configs = true
-warn_unused_ignores = true
 
 [tool.pytest]
 addopts = [
@@ -191,22 +191,22 @@ source = [
 [tool.tox]
 requires = [ "tox>=4.51", "tox-uv" ]
 env_list = [
-  "typing",
   { product = [
     { prefix = "3.", start = 10 },
   ] },
   "coverage",
+  "typing",
 ]
 [tool.tox.env.coverage]
 description = "combine and report coverage results"
-depends = [
-  "3.*",
-]
 dependency_groups = [ "testing" ]
 commands = [
   [ "coverage", "combine", "--debug=pathmap" ],
   [ "coverage", "report", "--show-missing" ],
   [ "coverage", "xml" ],
+]
+depends = [
+  "3.*",
 ]
 
 [tool.tox.env.default]
@@ -231,11 +231,11 @@ commands = [
   ],
 ]
 [tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
 description = "run tests on Python {py_dot_ver}"
 base_python_file = [ ".python-version" ]
+dependency_groups = [ "testing" ]
 pass_env = [
   "GITHUB_*",
 ]
-runner = "uv-venv-lock-runner"
-dependency_groups = [ "testing" ]
 commands = [ [ "coverage", "run", "-m", "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
