@@ -65,8 +65,8 @@ jobs:
       - run: >
           uvx
           --managed-python
-          --with tox-uv==${TOX_UV_VERSION}
-          --with tox==${TOX_VERSION}
+          --with tox-uv=="${TOX_UV_VERSION}"
+          --with tox=="${TOX_VERSION}"
           tox -e typing
 
   test:
