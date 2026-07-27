@@ -32,11 +32,11 @@ concurrency:
 env:
   FORCE_COLOR: 1
   # renovate: datasource=pypi depName=uv
-  UV_VERSION: 0.11.15
+  UV_VERSION: 0.11.32
   # renovate: datasource=pypi depName=tox
-  TOX_VERSION: 4.51.0
+  TOX_VERSION: 4.58.0
   # renovate: datasource=pypi depName=tox-uv
-  TOX_UV_VERSION: 1.33.0
+  TOX_UV_VERSION: 1.36.0
 
 jobs:
   build-package:
@@ -45,7 +45,7 @@ jobs:
     outputs:
       supported-python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -56,21 +56,26 @@ jobs:
     name: Typing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: ${{ env.UV_VERSION }}
       - run: >
           uvx
           --managed-python
-          --with tox-uv==${{ env.TOX_UV_VERSION }}
-          --with tox==${{ env.TOX_VERSION }}
+          --with tox-uv==${TOX_UV_VERSION}
+          --with tox==${TOX_VERSION}
           tox -e typing
 
   test:
     name: Test
     runs-on: ${{ matrix.os }}
     needs: build-package
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -81,18 +86,22 @@ jobs:
           - os: "macos-latest"
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           python-version: ${{ matrix.python-version }}
           version: ${{ env.UV_VERSION }}
       - run: >
           uvx
-          --with tox-uv==${{ env.TOX_UV_VERSION }}
-          --with tox==${{ env.TOX_VERSION }}
-          tox -e ${{ matrix.python-version || 'default' }}
+          --with tox-uv=="${TOX_UV_VERSION}"
+          --with tox=="${TOX_VERSION}"
+          tox -e "$TOX_ENV"
         env:
-          UV_PRERELEASE: "allow"
+          TOX_ENV: ${{ matrix.python-version || 'default' }}
+          TOX_VERSION: ${{ env.TOX_VERSION }}
+          TOX_UV_VERSION: ${{ env.TOX_UV_VERSION }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           include-hidden-files: true
@@ -104,20 +113,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: coverage-data-*
           merge-multiple: true
-      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: ${{ env.UV_VERSION }}
       - name: Combine coverage data and generate report
         run: >
           uvx
           --managed-python
-          --with tox-uv==${{ env.TOX_UV_VERSION }}
-          --with tox==${{ env.TOX_VERSION }}
+          --with tox-uv=="${TOX_UV_VERSION}"
+          --with tox=="${TOX_VERSION}"
           tox -e coverage
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:

@@ -74,7 +74,6 @@ source = "vcs"
 [tool.uv]
 required-version = ">=0.10"
 prerelease = "allow"
-preview = true
 [tool.uv.sources]
 meltano = { git = "https://github.com/meltano/meltano.git" }
 
@@ -134,13 +133,12 @@ select = [
   "YTT",  # flake8-2020
 ]
 ignore = [
-  "S310",  # Allow `urllib.open`
-  "S603",  # Allow `subprocess.run(..., shell=False)`
-  "UP026", # Replace `mock` import with `unittest.mock` - remove once Python 3.7 support is dropped
+  "suspicious-url-open-usage",
+  "subprocess-without-shell-equals-true",
 ]
 per-file-ignores."tests/**" = [
-  "D",    # Don't lint docstrings in tests
-  "S101", # Allow 'assert' in tests
+  "D",      # Don't lint docstrings in tests
+  "assert",
 ]
 flake8-annotations.allow-star-arg-any = true
 flake8-annotations.mypy-init-return = true
@@ -149,6 +147,7 @@ flake8-pytest-style.parametrize-values-type = "tuple"
 pydocstyle.convention = "google"
 
 [tool.pyproject-fmt]
+max_supported_python = "3.14"
 table_format = "long"
 
 [tool.mypy]
@@ -208,7 +207,6 @@ commands = [
 depends = [
   "3.*",
 ]
-
 [tool.tox.env.default]
 [tool.tox.env.typing]
 description = "type checks"
@@ -238,4 +236,5 @@ dependency_groups = [ "testing" ]
 pass_env = [
   "GITHUB_*",
 ]
+set_env = { PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1" }
 commands = [ [ "coverage", "run", "-m", "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
